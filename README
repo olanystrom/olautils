@@ -1,0 +1,1 @@
+elrp-vlan.xsf is a small tcl-script to be ran on ExtremeXOS to enable elrp on all present vlans.
