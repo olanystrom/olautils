@@ -1,0 +1,96 @@
+# @METADATASTART
+#@DetailDescriptionStart
+#############################################################################
+#
+# Script        	: Enable ELRP for all available VLANS 
+# Revision      	: 0.9.4
+# EXOS Version(s)  	: 12.x.x and Newer
+# Last Updated  	: May 5, 2011
+#
+# Purpose: 
+#			Enables ELRP on all VLANs in VR-Default, on all ports.
+#			Sets log-and-trap and disbles port for 180 seconds
+#
+# Author			: Ola Nyström
+# Contact			: ola.nystrom@networkservices.se, olanys@gmail.com
+###############################################################################
+#  Change Log
+#
+# 	3 December 2010: Script Created
+#   5 may 2011: Source Cleanup
+###############################################################################
+#@DetailDescriptionEnd
+enable cli scripting
+enable elrp-client
+
+#initialize CLI.OUT to purge any data
+set var CLI.OUT " "
+show elrp
+set var len $TCL(llength ${CLI.OUT})
+set var elrplist $TCL(split ${CLI.OUT} "\n")
+# The elrplist now have the results from a "show elrp" command
+delete var CLI.OUT
+set var count 0
+set var thisline " "
+set var elrpvlans " "
+# This variable needed as a seed key. Do not remove
+set var matching CLI
+# This while statement will go through the elrplist and pull the VLANs that have protection
+while ($count < $len) do
+        set var curr $TCL(lindex $elrplist $count)
+        set var temp $TCL(regexp -all ${matching} $curr)
+        if ($temp) then
+				set var thisline $TCL(split $curr)
+                set var vlanName $TCL(lindex $thisline 5)
+                set var vlanName $TCL(string trim $vlanName)
+				set var elrpvlans "$(elrpvlans) xX$(vlanName)Xx"
+        endif
+        set var count ($count+1)		
+endwhile
+#initialize CLI.OUT to purge any data
+set var CLI.OUT " "
+# Show all VLANs on the switch
+show vlan
+# The CLI.OUT has the results from a "show vlan" command
+#
+set var len $TCL(llength ${CLI.OUT})
+set var vlanlist $TCL(split ${CLI.OUT} "\n")
+delete var CLI.OUT
+set var count 0
+# Thisline variable needed as a seed key. Do not remove
+set var thisline " "
+# set var matching to what we are searching for
+set var matching VR-Default
+# This while statement will go through the CLI.OUT and pull the VLANs
+# and check if elrp is already enabled.
+# if not enable elrp on that vlan
+while ($count < $len) do
+        set var curr $TCL(lindex $vlanlist $count)
+        set var temp $TCL(regexp -all ${matching} $curr)
+        if ($temp) then
+				set var thisline $TCL(split $curr " ")
+                set var vlanName $TCL(lindex $thisline 0)
+                set var vlanName $TCL(string trim $vlanName)
+				set var reg "xX$(vlanName)Xx"
+				set var temp $TCL(regexp -all ${reg} $elrpvlans)
+				if ($temp) then
+					# the vlan already have elrp enabled
+					# Here we can display something if we want
+				else
+					set var displaystring "Enabling ELRP on $(vlanName) all ports"
+					show var displaystring
+					delete var displaystring
+					configure elrp-client periodic $vlanname ports all log-and-trap disable-port duration 180
+					endif
+        endif
+        set var count ($count+1)		
+endwhile
+delete var vlanlist
+delete var thisline
+delete var vlanName
+delete var count
+delete var elrplist
+delete var matching
+delete var temp
+delete var len
+delete var curr
