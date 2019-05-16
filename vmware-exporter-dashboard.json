@@ -19,7 +19,7 @@
   "gnetId": 10076,
   "graphTooltip": 1,
   "id": 16,
-  "iteration": 1557999326794,
+  "iteration": 1558000412744,
   "links": [],
   "panels": [
     {
@@ -958,7 +958,7 @@
         "x": 0,
         "y": 31
       },
-      "id": 8,
+      "id": 32,
       "legend": {
         "alignAsTable": true,
         "avg": false,
@@ -986,7 +986,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "vmware_vm_cpu_usagemhz_average{host_name=~\"$esxhost\"}/100",
+          "expr": "vmware_vm_cpu_usagemhz_average{host_name=~\"$esxhost\"}*1000*1000",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1015,7 +1015,7 @@
       },
       "yaxes": [
         {
-          "format": "percent",
+          "format": "hertz",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -1137,7 +1137,7 @@
         "type": "datasource"
       },
       {
-        "allValue": null,
+        "allValue": ".*",
         "current": {
           "text": "194.14.56.187",
           "value": [
@@ -1147,9 +1147,9 @@
         "datasource": "Prometheus",
         "definition": "",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "label": "esxhost",
-        "multi": true,
+        "multi": false,
         "name": "esxhost",
         "options": [],
         "query": "label_values(vmware_host_boot_timestamp_seconds,host_name)",
@@ -1198,5 +1198,5 @@
   "timezone": "browser",
   "title": "VMware ESXi",
   "uid": "_gg9LEqmk",
-  "version": 4
+  "version": 6
 }
